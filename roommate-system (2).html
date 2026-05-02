@@ -1,0 +1,2336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoomieMatch - Campus Roommate Recommendation Engine</title>
+  <meta name="description" content="Find your perfect roommate based on verified institutional data and personal compatibility metrics.">
+  <meta property="og:title" content="RoomieMatch - Campus Roommate Recommendation Engine">
+  <meta property="og:url" content="https://roommaterecommendation.system">
+  <meta property="og:type" content="website">
+  <style>
+    /* ============================================
+       CSS RESET & VARIABLES
+       ============================================ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --emerald-50: #ecfdf5;
+      --emerald-100: #d1fae5;
+      --emerald-200: #a7f3d0;
+      --emerald-500: #10b981;
+      --emerald-600: #059669;
+      --emerald-700: #047857;
+      --teal-50: #f0fdfa;
+      --teal-100: #ccfbf1;
+      --teal-500: #14b8a6;
+      --teal-600: #0d9488;
+      --amber-100: #fef3c7;
+      --amber-400: #fbbf24;
+      --amber-500: #f59e0b;
+      --red-100: #fee2e2;
+      --red-500: #ef4444;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --white: #ffffff;
+      --radius: 0.625rem;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+      --transition: all 0.2s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: var(--gray-900);
+      background: var(--white);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================
+       UTILITY CLASSES
+       ============================================ */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-1 { gap: 0.25rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-4 { gap: 1rem; }
+    .gap-6 { gap: 1.5rem; }
+    .gap-8 { gap: 2rem; }
+    .grid { display: grid; }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .text-center { text-align: center; }
+    .text-sm { font-size: 0.875rem; }
+    .text-xs { font-size: 0.75rem; }
+    .text-lg { font-size: 1.125rem; }
+    .text-xl { font-size: 1.25rem; }
+    .text-2xl { font-size: 1.5rem; }
+    .text-3xl { font-size: 1.875rem; }
+    .text-4xl { font-size: 2.25rem; }
+    .text-5xl { font-size: 3rem; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .text-muted { color: var(--gray-500); }
+    .text-emerald { color: var(--emerald-600); }
+    .text-white { color: var(--white); }
+    .w-full { width: 100%; }
+    .hidden { display: none !important; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-6 { margin-bottom: 1.5rem; }
+    .mb-8 { margin-bottom: 2rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mt-auto { margin-top: auto; }
+    .p-2 { padding: 0.5rem; }
+    .p-3 { padding: 0.75rem; }
+    .p-4 { padding: 1rem; }
+    .p-6 { padding: 1.5rem; }
+    .p-8 { padding: 2rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+    .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+    .rounded { border-radius: var(--radius); }
+    .rounded-lg { border-radius: 0.75rem; }
+    .rounded-full { border-radius: 9999px; }
+    .border { border: 1px solid var(--gray-200); }
+    .border-b { border-bottom: 1px solid var(--gray-200); }
+    .bg-white { background: var(--white); }
+    .bg-emerald-50 { background: var(--emerald-50); }
+    .bg-emerald-100 { background: var(--emerald-100); }
+    .bg-gray-50 { background: var(--gray-50); }
+    .bg-gray-100 { background: var(--gray-100); }
+    .shadow { box-shadow: var(--shadow); }
+    .shadow-md { box-shadow: var(--shadow-md); }
+    .shadow-lg { box-shadow: var(--shadow-lg); }
+    .shadow-xl { box-shadow: var(--shadow-xl); }
+    .overflow-hidden { overflow: hidden; }
+    .overflow-y-auto { overflow-y: auto; }
+    .relative { position: relative; }
+    .absolute { position: absolute; }
+    .fixed { position: fixed; }
+    .sticky { position: sticky; }
+    .top-0 { top: 0; }
+    .inset-0 { inset: 0; }
+    .z-50 { z-index: 50; }
+
+    /* ============================================
+       BUTTON STYLES
+       ============================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      line-height: 1.5;
+    }
+    .btn-primary { background: var(--emerald-600); color: var(--white); border-color: var(--emerald-600); }
+    .btn-primary:hover { background: var(--emerald-700); border-color: var(--emerald-700); }
+    .btn-outline { background: var(--white); color: var(--gray-700); border-color: var(--gray-300); }
+    .btn-outline:hover { background: var(--gray-50); }
+    .btn-ghost { background: transparent; color: var(--gray-600); border: none; }
+    .btn-ghost:hover { background: var(--gray-100); color: var(--gray-900); }
+    .btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
+    .btn-sm { padding: 0.25rem 0.75rem; font-size: 0.75rem; }
+    .btn-danger { background: var(--red-500); color: var(--white); border-color: var(--red-500); }
+    .btn-danger:hover { opacity: 0.9; }
+    .btn-white { background: var(--white); color: var(--emerald-700); border: 1px solid var(--white); }
+    .btn-white:hover { background: var(--emerald-50); }
+    .btn-outline-white { background: transparent; color: var(--white); border: 1px solid var(--white); }
+    .btn-outline-white:hover { background: rgba(255,255,255,0.1); }
+
+    /* ============================================
+       CARD STYLES
+       ============================================ */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .card:hover { box-shadow: var(--shadow-md); }
+    .card-body { padding: 1.5rem; }
+
+    /* ============================================
+       BADGE STYLES
+       ============================================ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.125rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border-radius: 9999px;
+      border: 1px solid transparent;
+    }
+    .badge-emerald { background: var(--emerald-100); color: var(--emerald-700); }
+    .badge-gray { background: var(--gray-100); color: var(--gray-600); }
+    .badge-outline { background: var(--white); color: var(--gray-600); border-color: var(--gray-300); }
+    .badge-amber { background: var(--amber-100); color: var(--amber-500); }
+    .badge-red { background: var(--red-100); color: var(--red-500); }
+    .badge-teal { background: var(--teal-100); color: var(--teal-600); }
+
+    /* ============================================
+       FORM STYLES
+       ============================================ */
+    .form-group { margin-bottom: 1rem; }
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.375rem;
+      color: var(--gray-700);
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius);
+      background: var(--white);
+      color: var(--gray-900);
+      transition: var(--transition);
+      outline: none;
+      font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--emerald-500);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    .form-input:disabled { background: var(--gray-50); color: var(--gray-400); cursor: not-allowed; }
+    .form-textarea { resize: vertical; min-height: 80px; }
+
+    /* ============================================
+       AVATAR
+       ============================================ */
+    .avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      background: var(--emerald-100);
+      color: var(--emerald-700);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .avatar-sm { width: 2rem; height: 2rem; font-size: 0.75rem; }
+    .avatar-md { width: 2.5rem; height: 2.5rem; font-size: 0.875rem; }
+    .avatar-lg { width: 3rem; height: 3rem; font-size: 1rem; }
+    .avatar-xl { width: 6rem; height: 6rem; font-size: 1.5rem; }
+
+    /* ============================================
+       PROGRESS BAR
+       ============================================ */
+    .progress-bar { width: 100%; height: 0.5rem; background: var(--gray-200); border-radius: 9999px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--emerald-500); border-radius: 9999px; transition: width 0.3s ease; }
+
+    .separator { height: 1px; background: var(--gray-200); margin: 1rem 0; }
+
+    /* ============================================
+       RADIO / CHECKBOX GROUP
+       ============================================ */
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      margin-bottom: 0.5rem;
+    }
+    .radio-option:hover { background: var(--gray-50); }
+    .radio-option.selected { border-color: var(--emerald-500); background: var(--emerald-50); }
+    .radio-option input { accent-color: var(--emerald-600); }
+
+    .tag-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.8125rem;
+      border: 1px solid var(--gray-200);
+      border-radius: 9999px;
+      cursor: pointer;
+      background: var(--white);
+      transition: var(--transition);
+      color: var(--gray-700);
+    }
+    .tag-btn:hover { background: var(--gray-50); }
+    .tag-btn.selected-emerald { background: var(--emerald-100); border-color: var(--emerald-500); color: var(--emerald-700); }
+
+    /* ============================================
+       MODAL
+       ============================================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+    }
+    .modal-content {
+      background: var(--white);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 32rem;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-xl);
+    }
+    .modal-header { padding: 1.5rem 1.5rem 0; }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer { padding: 0 1.5rem 1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem; }
+
+    /* ============================================
+       ROLE SELECTOR (Student vs Admin)
+       ============================================ */
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .role-card {
+      padding: 1.25rem;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius);
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition);
+    }
+    .role-card:hover { border-color: var(--gray-300); background: var(--gray-50); }
+    .role-card.selected { border-color: var(--emerald-500); background: var(--emerald-50); }
+    .role-card-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .role-card-title { font-weight: 600; font-size: 0.9375rem; margin-bottom: 0.25rem; }
+    .role-card-desc { font-size: 0.75rem; color: var(--gray-500); }
+
+    /* ============================================
+       LANDING PAGE
+       ============================================ */
+    .landing-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .landing-header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    .logo-group { display: flex; align-items: center; gap: 0.5rem; }
+    .logo-icon {
+      width: 2rem;
+      height: 2rem;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--emerald-500), var(--teal-600));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-size: 0.875rem;
+    }
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--emerald-600), var(--teal-600));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { font-size: 0.875rem; color: var(--gray-500); text-decoration: none; transition: var(--transition); }
+    .nav-links a:hover { color: var(--gray-900); }
+    .header-actions { display: flex; gap: 0.5rem; }
+
+    /* Hero */
+    .hero-section {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--emerald-50), var(--teal-50), #ecfeff);
+    }
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 5rem; right: -5rem;
+      width: 24rem; height: 24rem;
+      border-radius: 50%;
+      background: rgba(167, 243, 208, 0.3);
+      filter: blur(60px);
+    }
+    .hero-section::after {
+      content: '';
+      position: absolute;
+      bottom: 2.5rem; left: -5rem;
+      width: 18rem; height: 18rem;
+      border-radius: 50%;
+      background: rgba(204, 251, 241, 0.3);
+      filter: blur(60px);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      padding: 4rem 0;
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      background: var(--emerald-100);
+      color: var(--emerald-700);
+      border-radius: 9999px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+    .hero-title { font-size: 3rem; font-weight: 700; line-height: 1.15; margin-bottom: 1.5rem; }
+    .hero-title span {
+      background: linear-gradient(to right, var(--emerald-600), var(--teal-600));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-desc { font-size: 1.125rem; color: var(--gray-500); margin-bottom: 2rem; max-width: 32rem; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .hero-stats { display: flex; gap: 1rem; margin-top: 2rem; font-size: 0.875rem; color: var(--gray-500); }
+    .hero-stats > div { display: flex; align-items: center; gap: 0.25rem; }
+    .hero-image-wrapper { position: relative; }
+    .hero-image-wrapper img { width: 100%; border-radius: 1rem; box-shadow: var(--shadow-xl); object-fit: cover; }
+    .hero-float-card {
+      position: absolute;
+      background: var(--white);
+      border-radius: 0.75rem;
+      box-shadow: var(--shadow-lg);
+      padding: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .hero-float-card.bottom-left { bottom: -1rem; left: -1rem; }
+    .hero-float-card.top-right { top: -1rem; right: -1rem; }
+    .hero-float-icon { width: 2.5rem; height: 2.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .hero-float-icon.emerald { background: var(--emerald-100); color: var(--emerald-600); }
+    .hero-float-icon.teal { background: var(--teal-100); color: var(--teal-600); }
+
+    /* Features */
+    .features-section { padding: 5rem 0; }
+    .section-badge { display: inline-block; padding: 0.25rem 0.75rem; background: var(--gray-100); color: var(--gray-600); border-radius: 9999px; font-size: 0.8125rem; font-weight: 500; margin-bottom: 1rem; }
+    .section-title { font-size: 2.25rem; font-weight: 700; margin-bottom: 1rem; }
+    .section-desc { color: var(--gray-500); max-width: 40rem; margin: 0 auto 4rem; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+    .feature-card { padding: 1.5rem; border: 1px solid var(--gray-200); border-radius: var(--radius); transition: var(--transition); }
+    .feature-card:hover { box-shadow: var(--shadow-md); }
+    .feature-icon { width: 3rem; height: 3rem; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; }
+    .feature-icon.emerald { background: var(--emerald-100); color: var(--emerald-600); }
+    .feature-icon.teal { background: var(--teal-100); color: var(--teal-600); }
+    .feature-icon.amber { background: var(--amber-100); color: var(--amber-500); }
+    .feature-icon.red { background: var(--red-100); color: var(--red-500); }
+    .feature-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .feature-desc { font-size: 0.875rem; color: var(--gray-500); line-height: 1.6; }
+
+    /* How It Works */
+    .how-section { padding: 5rem 0; background: var(--gray-50); }
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+    .step-card { text-align: center; }
+    .step-number { width: 5rem; height: 5rem; border-radius: 1rem; background: linear-gradient(135deg, var(--emerald-500), var(--teal-600)); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: var(--white); font-size: 1.5rem; font-weight: 700; box-shadow: var(--shadow-lg); }
+    .step-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .step-desc { color: var(--gray-500); font-size: 0.9375rem; }
+
+    /* Testimonials */
+    .testimonials-section { padding: 5rem 0; }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .testimonial-card { padding: 1.5rem; border: 1px solid var(--gray-200); border-radius: var(--radius); }
+    .testimonial-card:hover { box-shadow: var(--shadow-md); }
+    .stars { display: flex; gap: 0.125rem; margin-bottom: 1rem; }
+    .star { color: var(--amber-400); font-size: 1rem; }
+    .testimonial-text { font-size: 0.875rem; color: var(--gray-500); margin-bottom: 1rem; font-style: italic; }
+    .testimonial-author { display: flex; align-items: center; gap: 0.5rem; }
+    .testimonial-name { font-size: 0.875rem; font-weight: 500; }
+    .testimonial-role { font-size: 0.75rem; color: var(--gray-500); }
+
+    /* CTA */
+    .cta-section { padding: 5rem 0; background: linear-gradient(to right, var(--emerald-600), var(--teal-600)); color: var(--white); text-align: center; }
+    .cta-title { font-size: 2.25rem; font-weight: 700; margin-bottom: 1rem; }
+    .cta-desc { color: rgba(209, 250, 229, 1); margin-bottom: 2rem; max-width: 36rem; margin-left: auto; margin-right: auto; }
+    .cta-actions { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+
+    /* Demo */
+    .demo-section { padding: 3rem 0; background: var(--gray-50); text-align: center; }
+    .demo-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+
+    /* Footer */
+    .landing-footer { padding: 2rem 0; border-top: 1px solid var(--gray-200); }
+    .landing-footer .container { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .footer-links { display: flex; gap: 1rem; font-size: 0.875rem; color: var(--gray-500); }
+    .footer-links span:hover { color: var(--gray-900); cursor: pointer; }
+
+    /* ============================================
+       DASHBOARD
+       ============================================ */
+    .dashboard-layout { display: flex; height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 16rem; background: var(--white); border-right: 1px solid var(--gray-200); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { padding: 1rem; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 0.5rem; }
+    .sidebar-user { padding: 0.75rem; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 0.75rem; }
+    .sidebar-user-info { min-width: 0; flex: 1; }
+    .sidebar-user-name { font-size: 0.875rem; font-weight: 500; }
+    .sidebar-user-role { font-size: 0.75rem; color: var(--gray-500); }
+    .sidebar-nav { flex: 1; padding: 0.5rem; overflow-y: auto; }
+    .sidebar-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--gray-500);
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: left;
+    }
+    .sidebar-nav-item:hover { background: var(--gray-100); color: var(--gray-900); }
+    .sidebar-nav-item.active { background: var(--emerald-100); color: var(--emerald-700); }
+    .sidebar-nav-badge { margin-left: auto; background: var(--emerald-600); color: var(--white); font-size: 0.625rem; padding: 0.125rem 0.375rem; border-radius: 9999px; }
+    .sidebar-footer { padding: 0.5rem; border-top: 1px solid var(--gray-200); }
+    .sidebar-logout {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--gray-500);
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: left;
+    }
+    .sidebar-logout:hover { background: var(--red-100); color: var(--red-500); }
+
+    /* Main Content */
+    .dashboard-main { flex: 1; overflow-y: auto; padding: 2rem; background: var(--gray-50); }
+    .dashboard-content { max-width: 56rem; }
+
+    /* Tab Header */
+    .tab-header { margin-bottom: 1.5rem; }
+    .tab-title { font-size: 1.5rem; font-weight: 700; }
+    .tab-desc { color: var(--gray-500); font-size: 0.875rem; }
+
+    /* Match Card */
+    .match-card { border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 1.5rem; background: var(--white); transition: var(--transition); margin-bottom: 1rem; }
+    .match-card:hover { box-shadow: var(--shadow-md); }
+    .match-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
+    .match-user { display: flex; align-items: center; gap: 0.75rem; }
+    .match-name { font-weight: 600; font-size: 0.9375rem; }
+    .match-dept { font-size: 0.75rem; color: var(--gray-500); }
+    .match-score { text-align: center; padding: 0.25rem 0.5rem; border-radius: var(--radius); }
+    .match-score-value { font-size: 1.25rem; font-weight: 700; }
+    .match-score-label { font-size: 0.625rem; color: var(--gray-500); }
+    .match-score.high .match-score-value { color: var(--emerald-600); }
+    .match-score.high { background: var(--emerald-100); }
+    .match-score.medium .match-score-value { color: var(--amber-500); }
+    .match-score.medium { background: var(--amber-100); }
+    .match-score.low .match-score-value { color: var(--red-500); }
+    .match-score.low { background: var(--red-100); }
+    .match-bio { font-size: 0.8125rem; color: var(--gray-500); margin-bottom: 0.75rem; }
+    .match-categories { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+    .match-category { text-align: center; padding: 0.5rem; background: var(--gray-50); border-radius: var(--radius); }
+    .match-category-score { font-weight: 600; font-size: 0.875rem; }
+    .match-category-label { font-size: 0.6875rem; color: var(--gray-500); }
+    .match-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+
+    /* Room Card */
+    .room-card { border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; background: var(--white); transition: var(--transition); }
+    .room-card:hover { box-shadow: var(--shadow-md); }
+    .room-image { height: 10rem; background: linear-gradient(135deg, var(--emerald-100), var(--teal-50)); display: flex; align-items: center; justify-content: center; position: relative; font-size: 3rem; color: var(--emerald-300); }
+    .room-available { position: absolute; top: 0.5rem; right: 0.5rem; }
+    .room-floor { position: absolute; top: 0.5rem; left: 0.5rem; }
+    .room-info { padding: 1rem; }
+    .room-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+    .room-number { font-weight: 600; }
+    .room-price { font-weight: 600; font-size: 0.875rem; color: var(--emerald-600); }
+    .room-hostel { font-size: 0.8125rem; color: var(--gray-500); margin-bottom: 0.75rem; }
+    .room-amenities { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+
+    /* Chat */
+    .chat-layout { display: flex; height: calc(100vh - 12rem); border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; background: var(--white); }
+    .chat-list { width: 20rem; border-right: 1px solid var(--gray-200); display: flex; flex-direction: column; }
+    .chat-list-header { padding: 0.75rem; border-bottom: 1px solid var(--gray-200); }
+    .chat-list-items { flex: 1; overflow-y: auto; }
+    .chat-list-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; cursor: pointer; transition: var(--transition); border: none; background: none; width: 100%; text-align: left; }
+    .chat-list-item:hover { background: var(--gray-50); }
+    .chat-list-item.active { background: var(--gray-100); }
+    .chat-list-item-info { min-width: 0; flex: 1; }
+    .chat-list-item-top { display: flex; justify-content: space-between; }
+    .chat-list-item-name { font-size: 0.875rem; font-weight: 500; }
+    .chat-list-item-time { font-size: 0.625rem; color: var(--gray-400); }
+    .chat-list-item-msg { font-size: 0.75rem; color: var(--gray-500); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chat-area { flex: 1; display: flex; flex-direction: column; }
+    .chat-header { padding: 0.75rem; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 0.75rem; }
+    .chat-header-name { font-size: 0.875rem; font-weight: 500; }
+    .chat-header-status { font-size: 0.75rem; color: var(--gray-500); }
+    .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
+    .chat-bubble { max-width: 70%; padding: 0.5rem 0.75rem; border-radius: var(--radius); font-size: 0.875rem; }
+    .chat-bubble.sent { background: var(--emerald-600); color: var(--white); align-self: flex-end; }
+    .chat-bubble.received { background: var(--gray-100); align-self: flex-start; }
+    .chat-bubble-time { font-size: 0.625rem; margin-top: 0.25rem; }
+    .chat-bubble.sent .chat-bubble-time { color: rgba(209, 250, 229, 1); }
+    .chat-bubble.received .chat-bubble-time { color: var(--gray-400); }
+    .chat-input-area { padding: 0.75rem; border-top: 1px solid var(--gray-200); display: flex; gap: 0.5rem; }
+    .chat-input { flex: 1; }
+    .chat-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--gray-400); text-align: center; }
+
+    /* Admin Stats */
+    .stat-card { padding: 1.5rem; border: 1px solid var(--gray-200); border-radius: var(--radius); display: flex; align-items: center; justify-content: space-between; background: var(--white); }
+    .stat-value { font-size: 1.5rem; font-weight: 700; }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); }
+    .stat-icon { width: 2.5rem; height: 2.5rem; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+    .stat-icon.emerald { background: var(--emerald-100); color: var(--emerald-600); }
+    .stat-icon.teal { background: var(--teal-100); color: var(--teal-600); }
+    .stat-icon.amber { background: var(--amber-100); color: var(--amber-500); }
+
+    /* Survey step indicator */
+    .survey-steps { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .survey-step-dot { flex: 1; height: 0.375rem; border-radius: 9999px; background: var(--gray-200); }
+    .survey-step-dot.active { background: var(--emerald-500); }
+    .survey-step-dot.completed { background: var(--emerald-600); }
+
+    /* Toast notification */
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--gray-900); color: var(--white); padding: 0.75rem 1.25rem; border-radius: var(--radius); font-size: 0.875rem; z-index: 200; box-shadow: var(--shadow-lg); animation: slideUp 0.3s ease; }
+    @keyframes slideUp { from { transform: translateY(1rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+    @media (max-width: 768px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-image-wrapper { display: none; }
+      .features-grid, .steps-grid, .testimonials-grid { grid-template-columns: 1fr; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .sidebar { width: 14rem; }
+      .chat-list { width: 100%; }
+      .chat-area { display: none; }
+      .chat-area.active { display: flex; }
+      .hero-title { font-size: 2rem; }
+      .section-title { font-size: 1.5rem; }
+      .cta-title { font-size: 1.5rem; }
+      .landing-footer .container { flex-direction: column; text-align: center; }
+      .dashboard-main { padding: 1rem; }
+      .role-selector { grid-template-columns: 1fr; }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================
+       LANDING PAGE
+       ============================================ -->
+  <div id="landing-page">
+    <header class="landing-header">
+      <div class="container">
+        <div class="logo-group">
+          <div class="logo-icon">&#127968;</div>
+          <span class="logo-text">RoomieMatch</span>
+        </div>
+        <nav class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#testimonials">Testimonials</a>
+        </nav>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="showModal('login')">Log In</button>
+          <button class="btn btn-primary" onclick="showModal('register')">Sign Up</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero-section">
+      <div class="container">
+        <div class="hero-grid">
+          <div>
+            <div class="hero-badge">&#10024; AI-Powered Matching</div>
+            <h1 class="hero-title">Find Your Perfect <span>Roommate</span></h1>
+            <p class="hero-desc">Campus-Linked Roommate Recommendation Engine that matches you with compatible living partners based on verified institutional data and lifestyle preferences.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary btn-lg" onclick="showModal('register')">Get Started &#8594;</button>
+              <button class="btn btn-outline btn-lg" onclick="showModal('login')">Log In</button>
+            </div>
+            <div class="hero-stats">
+              <div>&#128737; Institutionally Verified</div>
+              <div>&#9989; 500+ Students</div>
+              <div>&#11088; 92% Match Rate</div>
+            </div>
+          </div>
+          <div class="hero-image-wrapper">
+            <img src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&h=500&fit=crop" alt="Campus dormitory with students" />
+            <div class="hero-float-card bottom-left">
+              <div class="hero-float-icon emerald">&#10084;</div>
+              <div>
+                <div style="font-size:0.875rem;font-weight:600;">92% Match</div>
+                <div style="font-size:0.75rem;color:var(--gray-500);">Alex & Sarah</div>
+              </div>
+            </div>
+            <div class="hero-float-card top-right">
+              <div class="hero-float-icon teal">&#128737;</div>
+              <div>
+                <div style="font-size:0.875rem;font-weight:600;">Verified</div>
+                <div style="font-size:0.75rem;color:var(--gray-500);">MIT Students</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="features-section">
+      <div class="container text-center">
+        <div class="section-badge">Features</div>
+        <h2 class="section-title">Everything You Need for Better Housing</h2>
+        <p class="section-desc">Our platform combines institutional verification with smart matching to ensure you find the perfect roommate from your campus community.</p>
+        <div class="features-grid">
+          <div class="feature-card"><div class="feature-icon emerald">&#128737;</div><div class="feature-title">Institutional Verification</div><div class="feature-desc">Only verified students from your institution can join, eliminating stranger danger and ensuring a safe community.</div></div>
+          <div class="feature-card"><div class="feature-icon teal">&#128200;</div><div class="feature-title">Smart Matching Algorithm</div><div class="feature-desc">Our weighted scoring system analyzes routines, social habits, and interests to find your most compatible roommate.</div></div>
+          <div class="feature-card"><div class="feature-icon emerald">&#128172;</div><div class="feature-title">Secure Messaging</div><div class="feature-desc">Chat with potential roommates before finalizing your choice. Get to know each other in a safe environment.</div></div>
+          <div class="feature-card"><div class="feature-icon amber">&#127970;</div><div class="feature-title">Room Inventory</div><div class="feature-desc">Browse available rooms in your campus hostels with detailed amenity listings and pricing information.</div></div>
+          <div class="feature-card"><div class="feature-icon red">&#128101;</div><div class="feature-title">Compatibility Survey</div><div class="feature-desc">Complete a lifestyle questionnaire covering sleep habits, social preferences, and interests for accurate matching.</div></div>
+          <div class="feature-card"><div class="feature-icon emerald">&#127942;</div><div class="feature-title">Mutual Confirmation</div><div class="feature-desc">Both students must accept the match before confirming, ensuring everyone is comfortable with the arrangement.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="how-section">
+      <div class="container text-center">
+        <div class="section-badge">How It Works</div>
+        <h2 class="section-title">Three Simple Steps</h2>
+        <p class="section-desc">Getting matched with the perfect roommate has never been easier.</p>
+        <div class="steps-grid">
+          <div class="step-card"><div class="step-number">01</div><div class="step-title">Sign Up & Verify</div><div class="step-desc">Register as a Student or Room Manager with your institutional email and get verified.</div></div>
+          <div class="step-card"><div class="step-number">02</div><div class="step-title">Complete Survey / Add Rooms</div><div class="step-desc">Students fill compatibility surveys. Room Managers register their hostels and rooms.</div></div>
+          <div class="step-card"><div class="step-number">03</div><div class="step-title">Get Matched</div><div class="step-desc">Browse matched roommates, chat with them, and find rooms near your location.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="testimonials" class="testimonials-section">
+      <div class="container text-center">
+        <div class="section-badge">Testimonials</div>
+        <h2 class="section-title">What Students Say</h2>
+        <div class="testimonials-grid" style="margin-top:2rem;">
+          <div class="testimonial-card"><div class="stars"><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span></div><div class="testimonial-text">"Found my perfect roommate in just 2 days! Our sleep schedules and study habits match perfectly."</div><div class="testimonial-author"><div class="avatar avatar-sm">AJ</div><div><div class="testimonial-name">Alex J.</div><div class="testimonial-role">CS Junior at MIT</div></div></div></div>
+          <div class="testimonial-card"><div class="stars"><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span></div><div class="testimonial-text">"The compatibility survey is spot-on. My roommate and I have become great friends!"</div><div class="testimonial-author"><div class="avatar avatar-sm">SC</div><div><div class="testimonial-name">Sarah C.</div><div class="testimonial-role">Data Science Sophomore</div></div></div></div>
+          <div class="testimonial-card"><div class="stars"><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span></div><div class="testimonial-text">"As a Room Manager, I can easily list my hostels and rooms. The admin panel saves me hours every week!"</div><div class="testimonial-author"><div class="avatar avatar-sm">MR</div><div><div class="testimonial-name">Mike R.</div><div class="testimonial-role">Hostel Manager at MIT</div></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <div class="container">
+        <h2 class="cta-title">Ready to Find Your Perfect Roommate?</h2>
+        <p class="cta-desc">Join hundreds of students who have found their ideal living partners through our smart matching system.</p>
+        <div class="cta-actions">
+          <button class="btn btn-white btn-lg" onclick="showModal('register')">Get Started Free</button>
+          <button class="btn btn-outline-white btn-lg" onclick="showModal('login')">Log In</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <div class="container">
+        <h3 class="text-xl font-semibold mb-4">Try the Demo</h3>
+        <p class="text-muted mb-6">Login with demo accounts: <strong>alex@mit.edu</strong> or <strong>sarah@mit.edu</strong> (Student) / <strong>admin@mit.edu</strong> (Room Manager) - password: <strong>demo123</strong></p>
+        <div class="demo-buttons">
+          <button class="btn btn-primary" onclick="quickLogin('alex@mit.edu')">Login as Alex (Student)</button>
+          <button class="btn btn-outline" onclick="quickLogin('sarah@mit.edu')">Login as Sarah (Student)</button>
+          <button class="btn btn-outline" onclick="quickLogin('admin@mit.edu')">Login as Admin (Room Manager)</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="landing-footer">
+      <div class="container">
+        <div class="logo-group">
+          <div class="logo-icon">&#127968;</div>
+          <span class="logo-text">RoomieMatch</span>
+        </div>
+        <div class="footer-links">
+          <span>Privacy</span>
+          <span>Terms</span>
+          <span>Contact</span>
+        </div>
+        <div class="text-sm text-muted">&copy; 2024 RoomieMatch. All rights reserved.</div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ============================================
+       LOGIN MODAL
+       ============================================ -->
+  <div id="login-modal" class="modal-overlay hidden" onclick="if(event.target===this)hideModal('login')">
+    <div class="modal-content" style="max-width:28rem;">
+      <div class="modal-header">
+        <h2 class="text-xl font-bold">Welcome Back</h2>
+        <p class="text-sm text-muted">Log in to your RoomieMatch account</p>
+      </div>
+      <div class="modal-body">
+        <div id="login-error" class="hidden" style="background:var(--red-100);color:var(--red-500);padding:0.5rem 0.75rem;border-radius:var(--radius);font-size:0.875rem;margin-bottom:1rem;"></div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="login-email" class="form-input" placeholder="you@mit.edu" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="Enter your password" />
+        </div>
+        <button class="btn btn-primary w-full" onclick="handleLogin()">Log In</button>
+        <div class="separator"></div>
+        <p class="text-sm text-center text-muted">Don't have an account? <a href="#" onclick="hideModal('login');showModal('register');return false;" style="color:var(--emerald-600);font-weight:500;">Sign Up</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       REGISTER MODAL (with Role Selection)
+       ============================================ -->
+  <div id="register-modal" class="modal-overlay hidden" onclick="if(event.target===this)hideModal('register')">
+    <div class="modal-content" style="max-width:32rem;">
+      <div class="modal-header">
+        <h2 class="text-xl font-bold">Create Account</h2>
+        <p class="text-sm text-muted">Choose your role and join RoomieMatch</p>
+      </div>
+      <div class="modal-body">
+        <div id="register-error" class="hidden" style="background:var(--red-100);color:var(--red-500);padding:0.5rem 0.75rem;border-radius:var(--radius);font-size:0.875rem;margin-bottom:1rem;"></div>
+
+        <!-- Role Selector -->
+        <div class="role-selector">
+          <div class="role-card selected" onclick="selectRole('student')" id="role-student">
+            <div class="role-card-icon">&#127891;</div>
+            <div class="role-card-title">Student</div>
+            <div class="role-card-desc">Find roommates & browse rooms</div>
+          </div>
+          <div class="role-card" onclick="selectRole('admin')" id="role-admin">
+            <div class="role-card-icon">&#127970;</div>
+            <div class="role-card-title">Room Manager</div>
+            <div class="role-card-desc">Register hostels & manage rooms</div>
+          </div>
+        </div>
+
+        <!-- Common Fields -->
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="reg-name" class="form-input" placeholder="John Doe" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="reg-email" class="form-input" placeholder="you@mit.edu" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="reg-password" class="form-input" placeholder="Min 6 characters" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" id="reg-phone" class="form-input" placeholder="+1 234 567 8900" />
+        </div>
+
+        <!-- Student-Specific Fields -->
+        <div id="student-fields">
+          <div class="form-group">
+            <label class="form-label">Institute</label>
+            <select id="reg-institute" class="form-select">
+              <option value="">Select institute</option>
+              <option value="MIT">MIT</option>
+              <option value="Stanford">Stanford</option>
+              <option value="Harvard">Harvard</option>
+              <option value="Caltech">Caltech</option>
+              <option value="IIT Delhi">IIT Delhi</option>
+              <option value="IIT Mumbai">IIT Mumbai</option>
+              <option value="NIT Trichy">NIT Trichy</option>
+              <option value="BITS Pilani">BITS Pilani</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <input type="text" id="reg-department" class="form-input" placeholder="e.g. Computer Science" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Year</label>
+            <select id="reg-year" class="form-select">
+              <option value="">Select year</option>
+              <option value="1">1st Year</option>
+              <option value="2">2nd Year</option>
+              <option value="3">3rd Year</option>
+              <option value="4">4th Year</option>
+              <option value="5">5th Year+</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preferred Location / City</label>
+            <select id="reg-location" class="form-select">
+              <option value="">Select preferred location</option>
+              <option value="Cambridge, MA">Cambridge, MA</option>
+              <option value="Stanford, CA">Stanford, CA</option>
+              <option value="New Delhi">New Delhi</option>
+              <option value="Mumbai">Mumbai</option>
+              <option value="Pilani, Rajasthan">Pilani, Rajasthan</option>
+              <option value="Tiruchirappalli, TN">Tiruchirappalli, TN</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Admin/Room Manager Fields -->
+        <div id="admin-fields" class="hidden">
+          <div class="form-group">
+            <label class="form-label">Organization / Institution</label>
+            <input type="text" id="reg-organization" class="form-input" placeholder="e.g. MIT Housing Authority" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location / City</label>
+            <select id="reg-admin-location" class="form-select">
+              <option value="">Select your location</option>
+              <option value="Cambridge, MA">Cambridge, MA</option>
+              <option value="Stanford, CA">Stanford, CA</option>
+              <option value="New Delhi">New Delhi</option>
+              <option value="Mumbai">Mumbai</option>
+              <option value="Pilani, Rajasthan">Pilani, Rajasthan</option>
+              <option value="Tiruchirappalli, TN">Tiruchirappalli, TN</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Designation</label>
+            <input type="text" id="reg-designation" class="form-input" placeholder="e.g. Hostel Warden, Owner" />
+          </div>
+        </div>
+
+        <button class="btn btn-primary w-full" onclick="handleRegister()">Create Account</button>
+        <div class="separator"></div>
+        <p class="text-sm text-center text-muted">Already have an account? <a href="#" onclick="hideModal('register');showModal('login');return false;" style="color:var(--emerald-600);font-weight:500;">Log In</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       DASHBOARD
+       ============================================ -->
+  <div id="dashboard" class="hidden">
+    <div class="dashboard-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo-icon">&#127968;</div>
+          <span class="logo-text">RoomieMatch</span>
+        </div>
+        <div class="sidebar-user">
+          <div id="sidebar-avatar" class="avatar avatar-md">AJ</div>
+          <div class="sidebar-user-info">
+            <div id="sidebar-name" class="sidebar-user-name">Alex Johnson</div>
+            <div id="sidebar-role" class="sidebar-user-role">Student at MIT</div>
+          </div>
+        </div>
+        <nav class="sidebar-nav" id="sidebar-nav">
+          <!-- Dynamically populated based on role -->
+        </nav>
+        <div class="sidebar-footer">
+          <button class="sidebar-logout" onclick="handleLogout()">
+            <span>&#128682;</span> Log Out
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="dashboard-main">
+        <div class="dashboard-content">
+
+          <!-- Profile Tab -->
+          <div id="tab-profile" class="tab-content">
+            <div class="tab-header">
+              <h1 class="tab-title" id="profile-tab-title">My Profile</h1>
+              <p class="tab-desc">View and edit your profile information</p>
+            </div>
+            <div class="card mb-6">
+              <div class="card-body">
+                <div class="flex items-center gap-4 mb-6">
+                  <div id="profile-avatar" class="avatar avatar-xl">AJ</div>
+                  <div>
+                    <h2 id="profile-name" class="text-xl font-bold">Alex Johnson</h2>
+                    <p id="profile-email" class="text-sm text-muted">alex@mit.edu</p>
+                    <div class="flex gap-2 mt-2">
+                      <span id="profile-dept-badge" class="badge badge-emerald">Computer Science</span>
+                      <span id="profile-year-badge" class="badge badge-gray">3rd Year</span>
+                      <span id="profile-role-badge" class="badge badge-teal">Student</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="grid grid-2 gap-4">
+                  <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="edit-name" class="form-input" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="edit-email" class="form-input" disabled />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Institute / Organization</label>
+                    <input type="text" id="edit-institute" class="form-input" disabled />
+                  </div>
+                  <div class="form-group" id="edit-dept-group">
+                    <label class="form-label">Department</label>
+                    <input type="text" id="edit-department" class="form-input" />
+                  </div>
+                  <div class="form-group" id="edit-year-group">
+                    <label class="form-label">Year</label>
+                    <select id="edit-year" class="form-select">
+                      <option value="1">1st Year</option>
+                      <option value="2">2nd Year</option>
+                      <option value="3">3rd Year</option>
+                      <option value="4">4th Year</option>
+                      <option value="5">5th Year+</option>
+                    </select>
+                  </div>
+                  <div class="form-group" id="edit-location-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" id="edit-location" class="form-input" />
+                  </div>
+                  <div class="form-group" style="grid-column: span 2;">
+                    <label class="form-label">Bio</label>
+                    <textarea id="edit-bio" class="form-textarea" rows="3" placeholder="Tell potential roommates about yourself..."></textarea>
+                  </div>
+                </div>
+                <button class="btn btn-primary mt-4" onclick="saveProfile()">Save Changes</button>
+              </div>
+            </div>
+
+            <!-- Student Survey (only for students) -->
+            <div id="survey-section" class="card">
+              <div class="card-body">
+                <h3 class="text-lg font-semibold mb-2">Compatibility Survey</h3>
+                <p class="text-sm text-muted mb-4">Complete this survey to get better roommate matches</p>
+                <div class="survey-steps">
+                  <div id="survey-dot-1" class="survey-step-dot active"></div>
+                  <div id="survey-dot-2" class="survey-step-dot"></div>
+                  <div id="survey-dot-3" class="survey-step-dot"></div>
+                </div>
+                <div id="survey-step-1" class="survey-panel">
+                  <h4 class="font-semibold mb-4">&#9200; Daily Routine</h4>
+                  <div class="form-group"><label class="form-label">Sleep Schedule</label>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-sleep')"><input type="radio" name="survey-sleep" value="early" /> Early bird (before 10 PM)</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-sleep')"><input type="radio" name="survey-sleep" value="moderate" /> Moderate (10 PM - 12 AM)</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-sleep')"><input type="radio" name="survey-sleep" value="night" /> Night owl (after 12 AM)</div>
+                  </div>
+                  <div class="form-group"><label class="form-label">Study Time</label>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-study')"><input type="radio" name="survey-study" value="morning" /> Morning (6 AM - 12 PM)</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-study')"><input type="radio" name="survey-study" value="afternoon" /> Afternoon (12 PM - 6 PM)</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-study')"><input type="radio" name="survey-study" value="evening" /> Evening (6 PM - 12 AM)</div>
+                  </div>
+                  <div class="form-group"><label class="form-label">Cleanliness Level</label>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-clean')"><input type="radio" name="survey-clean" value="very" /> Very tidy</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-clean')"><input type="radio" name="survey-clean" value="moderate" /> Moderately clean</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-clean')"><input type="radio" name="survey-clean" value="relaxed" /> Relaxed about mess</div>
+                  </div>
+                  <div class="flex justify-between mt-4"><div></div><button class="btn btn-primary" onclick="nextSurveyStep(2)">Next &#8594;</button></div>
+                </div>
+                <div id="survey-step-2" class="survey-panel hidden">
+                  <h4 class="font-semibold mb-4">&#127881; Social Habits</h4>
+                  <div class="form-group"><label class="form-label">Social Preference</label>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-social')"><input type="radio" name="survey-social" value="introvert" /> Introvert - Prefer quiet time</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-social')"><input type="radio" name="survey-social" value="ambivert" /> Ambivert - Mix of both</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-social')"><input type="radio" name="survey-social" value="extrovert" /> Extrovert - Love socializing</div>
+                  </div>
+                  <div class="form-group"><label class="form-label">Guest Policy</label>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-guests')"><input type="radio" name="survey-guests" value="rarely" /> Rarely have guests</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-guests')"><input type="radio" name="survey-guests" value="sometimes" /> Sometimes have guests</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-guests')"><input type="radio" name="survey-guests" value="often" /> Often have guests over</div>
+                  </div>
+                  <div class="form-group"><label class="form-label">Noise Tolerance</label>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-noise')"><input type="radio" name="survey-noise" value="low" /> Need silence</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-noise')"><input type="radio" name="survey-noise" value="medium" /> Some noise is OK</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-noise')"><input type="radio" name="survey-noise" value="high" /> Don't mind noise</div>
+                  </div>
+                  <div class="flex justify-between mt-4"><button class="btn btn-outline" onclick="nextSurveyStep(1)">&#8592; Back</button><button class="btn btn-primary" onclick="nextSurveyStep(3)">Next &#8594;</button></div>
+                </div>
+                <div id="survey-step-3" class="survey-panel hidden">
+                  <h4 class="font-semibold mb-4">&#127912; Interests</h4>
+                  <div class="form-group"><label class="form-label">Select your interests (click to toggle)</label><div id="interests-container" class="flex flex-wrap gap-2"></div></div>
+                  <div class="form-group"><label class="form-label">Smoking</label>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-smoking')"><input type="radio" name="survey-smoking" value="no" /> Non-smoker</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-smoking')"><input type="radio" name="survey-smoking" value="sometimes" /> Social smoker</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-smoking')"><input type="radio" name="survey-smoking" value="yes" /> Smoker</div>
+                  </div>
+                  <div class="form-group"><label class="form-label">Drinking</label>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-drinking')"><input type="radio" name="survey-drinking" value="no" /> Don't drink</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-drinking')"><input type="radio" name="survey-drinking" value="sometimes" /> Occasionally</div>
+                    <div class="radio-option" onclick="selectRadio(this,'survey-drinking')"><input type="radio" name="survey-drinking" value="yes" /> Regularly</div>
+                  </div>
+                  <div class="flex justify-between mt-4"><button class="btn btn-outline" onclick="nextSurveyStep(2)">&#8592; Back</button><button class="btn btn-primary" onclick="submitSurvey()">Submit Survey &#10003;</button></div>
+                </div>
+                <div id="survey-completed" class="hidden text-center p-6">
+                  <div style="font-size:3rem;margin-bottom:1rem;">&#10003;</div>
+                  <h3 class="text-lg font-semibold mb-2">Survey Completed!</h3>
+                  <p class="text-sm text-muted">Your matches have been updated based on your preferences.</p>
+                  <button class="btn btn-primary mt-4" onclick="switchTab('matches')">View Matches</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Matches Tab (Student only) -->
+          <div id="tab-matches" class="tab-content hidden">
+            <div class="tab-header">
+              <h1 class="tab-title">Roommate Matches</h1>
+              <p class="tab-desc">Students matched based on your compatibility profile</p>
+            </div>
+            <div class="flex gap-2 mb-6">
+              <button class="btn btn-sm btn-primary" id="filter-all" onclick="filterMatches('all')">All</button>
+              <button class="btn btn-sm btn-outline" id="filter-high" onclick="filterMatches('high')">High (&gt;80%)</button>
+              <button class="btn btn-sm btn-outline" id="filter-medium" onclick="filterMatches('medium')">Medium (50-80%)</button>
+              <button class="btn btn-sm btn-outline" id="filter-low" onclick="filterMatches('low')">Low (&lt;50%)</button>
+            </div>
+            <div id="matches-list"></div>
+          </div>
+
+          <!-- Rooms Tab -->
+          <div id="tab-rooms" class="tab-content hidden">
+            <div class="tab-header">
+              <h1 class="tab-title">Available Rooms</h1>
+              <p class="tab-desc">Browse rooms in hostels near your location</p>
+            </div>
+            <div class="flex gap-2 mb-6" id="hostel-filter-buttons">
+              <button class="btn btn-sm btn-primary" id="hostel-filter-all" onclick="filterRooms('all')">All Hostels</button>
+            </div>
+            <div id="rooms-list" class="grid grid-3 gap-4"></div>
+          </div>
+
+          <!-- Messages Tab -->
+          <div id="tab-messages" class="tab-content hidden">
+            <div class="tab-header">
+              <h1 class="tab-title">Messages</h1>
+              <p class="tab-desc">Chat with your potential roommates</p>
+            </div>
+            <div class="chat-layout">
+              <div class="chat-list">
+                <div class="chat-list-header">
+                  <input type="text" class="form-input" placeholder="Search conversations..." />
+                </div>
+                <div id="chat-list-items" class="chat-list-items"></div>
+              </div>
+              <div id="chat-area" class="chat-area">
+                <div id="chat-empty" class="chat-empty">
+                  <div>
+                    <div style="font-size:3rem;margin-bottom:1rem;">&#128172;</div>
+                    <p class="font-semibold">Select a conversation</p>
+                    <p class="text-sm text-muted">Choose a chat from the left to start messaging</p>
+                  </div>
+                </div>
+                <div id="chat-active" class="hidden" style="display:flex;flex-direction:column;height:100%;">
+                  <div class="chat-header">
+                    <div id="chat-avatar" class="avatar avatar-md">SC</div>
+                    <div><div id="chat-name" class="chat-header-name">Sarah Chen</div><div id="chat-status" class="chat-header-status">Online</div></div>
+                  </div>
+                  <div id="chat-messages" class="chat-messages"></div>
+                  <div class="chat-input-area">
+                    <input type="text" id="chat-input" class="form-input chat-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMessage()" />
+                    <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Admin Tab (Room Manager only) -->
+          <div id="tab-admin" class="tab-content hidden">
+            <div class="tab-header">
+              <h1 class="tab-title">Admin Panel</h1>
+              <p class="tab-desc">Manage your hostels, rooms, and view statistics</p>
+            </div>
+            <div id="admin-stats" class="grid grid-4 gap-4 mb-6"></div>
+
+            <!-- Add Hostel -->
+            <div class="card mb-6">
+              <div class="card-body">
+                <h3 class="font-semibold mb-4">Add New Hostel</h3>
+                <div class="grid grid-3 gap-4">
+                  <div class="form-group">
+                    <label class="form-label">Hostel Name</label>
+                    <input type="text" id="add-hostel-name" class="form-input" placeholder="e.g. Sunrise Hostel" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Location / City</label>
+                    <select id="add-hostel-location" class="form-select">
+                      <option value="">Select location</option>
+                      <option value="Cambridge, MA">Cambridge, MA</option>
+                      <option value="Stanford, CA">Stanford, CA</option>
+                      <option value="New Delhi">New Delhi</option>
+                      <option value="Mumbai">Mumbai</option>
+                      <option value="Pilani, Rajasthan">Pilani, Rajasthan</option>
+                      <option value="Tiruchirappalli, TN">Tiruchirappalli, TN</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Floors</label>
+                    <input type="number" id="add-hostel-floors" class="form-input" placeholder="e.g. 5" min="1" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Amenities (comma separated)</label>
+                  <input type="text" id="add-hostel-amenities" class="form-input" placeholder="e.g. WiFi, Laundry, AC, Gym" />
+                </div>
+                <button class="btn btn-primary" onclick="addHostel()">Add Hostel</button>
+              </div>
+            </div>
+
+            <!-- Hostel List -->
+            <div class="card mb-6">
+              <div class="card-body">
+                <h3 class="font-semibold mb-4">My Hostels</h3>
+                <div id="admin-hostels" class="grid grid-3 gap-4"></div>
+              </div>
+            </div>
+
+            <!-- Add Room -->
+            <div class="card mb-6">
+              <div class="card-body">
+                <h3 class="font-semibold mb-4">Add New Room</h3>
+                <div class="grid grid-3 gap-4">
+                  <div class="form-group">
+                    <label class="form-label">Hostel</label>
+                    <select id="add-room-hostel" class="form-select">
+                      <option value="">Select hostel</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Room Number</label>
+                    <input type="text" id="add-room-number" class="form-input" placeholder="e.g. 101" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Floor</label>
+                    <input type="number" id="add-room-floor" class="form-input" placeholder="e.g. 1" min="1" />
+                  </div>
+                </div>
+                <div class="grid grid-3 gap-4">
+                  <div class="form-group">
+                    <label class="form-label">Capacity</label>
+                    <input type="number" id="add-room-capacity" class="form-input" placeholder="e.g. 2" min="1" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Price ($/month)</label>
+                    <input type="number" id="add-room-price" class="form-input" placeholder="e.g. 800" min="0" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Amenities (comma separated)</label>
+                    <input type="text" id="add-room-amenities" class="form-input" placeholder="e.g. WiFi, AC" />
+                  </div>
+                </div>
+                <button class="btn btn-primary" onclick="addRoom()">Add Room</button>
+              </div>
+            </div>
+
+            <!-- Room List -->
+            <div class="card">
+              <div class="card-body">
+                <h3 class="font-semibold mb-4">My Rooms</h3>
+                <div id="admin-rooms" class="grid grid-2 gap-4"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ============================================
+       JAVASCRIPT
+       ============================================ -->
+  <script>
+    // ============================================
+    // DATA & STATE
+    // ============================================
+
+    const INTEREST_OPTIONS = [
+      'Gaming', 'Reading', 'Cooking', 'Sports', 'Music',
+      'Movies', 'Hiking', 'Photography', 'Art', 'Coding',
+      'Travel', 'Fitness', 'Yoga', 'Dancing', 'Writing'
+    ];
+
+    let currentUser = null;
+    let currentChatUserId = null;
+    let currentMatchFilter = 'all';
+    let currentHostelFilter = 'all';
+    let selectedRole = 'student';
+
+    // Default demo users
+    function getDefaultUsers() {
+      return [
+        {
+          id: 'u1', name: 'Alex Johnson', email: 'alex@mit.edu', password: 'demo123',
+          institute: 'MIT', department: 'Computer Science', year: '3', role: 'student',
+          location: 'Cambridge, MA', phone: '+1 617 555 0101',
+          bio: 'CS major who loves coding and gaming. Early bird, tidy and quiet.',
+          survey: { sleep: 'moderate', study: 'evening', clean: 'very', social: 'ambivert', guests: 'sometimes', noise: 'medium', smoking: 'no', drinking: 'sometimes', interests: ['Coding', 'Gaming', 'Reading'] }
+        },
+        {
+          id: 'u2', name: 'Sarah Chen', email: 'sarah@mit.edu', password: 'demo123',
+          institute: 'MIT', department: 'Data Science', year: '2', role: 'student',
+          location: 'Cambridge, MA', phone: '+1 617 555 0102',
+          bio: 'Data Science enthusiast. Night owl, love cooking and hiking.',
+          survey: { sleep: 'night', study: 'evening', clean: 'moderate', social: 'ambivert', guests: 'sometimes', noise: 'medium', smoking: 'no', drinking: 'no', interests: ['Coding', 'Hiking', 'Cooking'] }
+        },
+        {
+          id: 'u3', name: 'Mike Rodriguez', email: 'mike@mit.edu', password: 'demo123',
+          institute: 'MIT', department: 'Physics', year: '4', role: 'student',
+          location: 'Cambridge, MA', phone: '+1 617 555 0103',
+          bio: 'Physics major and gym enthusiast. Early riser, very organized.',
+          survey: { sleep: 'early', study: 'morning', clean: 'very', social: 'introvert', guests: 'rarely', noise: 'low', smoking: 'no', drinking: 'no', interests: ['Fitness', 'Reading', 'Photography'] }
+        },
+        {
+          id: 'u4', name: 'Emily Park', email: 'emily@mit.edu', password: 'demo123',
+          institute: 'MIT', department: 'Biology', year: '2', role: 'student',
+          location: 'Cambridge, MA', phone: '+1 617 555 0104',
+          bio: 'Biology student who loves art and music. Moderate schedule.',
+          survey: { sleep: 'moderate', study: 'afternoon', clean: 'moderate', social: 'extrovert', guests: 'often', noise: 'high', smoking: 'no', drinking: 'sometimes', interests: ['Art', 'Music', 'Travel'] }
+        },
+        {
+          id: 'u5', name: 'David Kim', email: 'david@mit.edu', password: 'demo123',
+          institute: 'MIT', department: 'Mathematics', year: '3', role: 'student',
+          location: 'Cambridge, MA', phone: '+1 617 555 0105',
+          bio: 'Math geek and chess lover. Very quiet and tidy.',
+          survey: { sleep: 'early', study: 'morning', clean: 'very', social: 'introvert', guests: 'rarely', noise: 'low', smoking: 'no', drinking: 'no', interests: ['Gaming', 'Reading', 'Coding'] }
+        },
+        {
+          id: 'u6', name: 'Lisa Wang', email: 'lisa@mit.edu', password: 'demo123',
+          institute: 'MIT', department: 'Chemistry', year: '4', role: 'student',
+          location: 'Cambridge, MA', phone: '+1 617 555 0106',
+          bio: 'Chemistry major who loves dancing and movies. Social butterfly!',
+          survey: { sleep: 'night', study: 'evening', clean: 'relaxed', social: 'extrovert', guests: 'often', noise: 'high', smoking: 'sometimes', drinking: 'sometimes', interests: ['Dancing', 'Movies', 'Travel'] }
+        },
+        {
+          id: 'u7', name: 'James Brown', email: 'james@mit.edu', password: 'demo123',
+          institute: 'MIT', department: 'Electrical Engineering', year: '1', role: 'student',
+          location: 'Cambridge, MA', phone: '+1 617 555 0107',
+          bio: 'EE freshman who plays sports and loves the outdoors.',
+          survey: { sleep: 'moderate', study: 'afternoon', clean: 'moderate', social: 'ambivert', guests: 'sometimes', noise: 'medium', smoking: 'no', drinking: 'no', interests: ['Sports', 'Hiking', 'Gaming'] }
+        },
+        {
+          id: 'u8', name: 'Priya Patel', email: 'priya@mit.edu', password: 'demo123',
+          institute: 'MIT', department: 'Computer Science', year: '2', role: 'student',
+          location: 'Mumbai', phone: '+91 98765 43210',
+          bio: 'CS major who loves yoga and photography. Quiet and peaceful.',
+          survey: { sleep: 'early', study: 'morning', clean: 'very', social: 'introvert', guests: 'rarely', noise: 'low', smoking: 'no', drinking: 'no', interests: ['Yoga', 'Photography', 'Reading'] }
+        },
+        {
+          id: 'admin1', name: 'Admin User', email: 'admin@mit.edu', password: 'demo123',
+          institute: 'MIT Housing Authority', department: 'Administration', year: '', role: 'admin',
+          location: 'Cambridge, MA', phone: '+1 617 555 0200',
+          organization: 'MIT Housing Authority', designation: 'Hostel Manager',
+          bio: 'Room Manager for MIT campus hostels. Managing Simmons Hall, Baker House, and McCormick Hall.',
+          survey: null
+        }
+      ];
+    }
+
+    function getDefaultHostels() {
+      return [
+        { id: 1, name: 'Simmons Hall', location: 'Cambridge, MA', floors: 5, amenities: ['WiFi', 'Laundry', 'AC', 'Gym'], ownerId: 'admin1' },
+        { id: 2, name: 'Baker House', location: 'Cambridge, MA', floors: 4, amenities: ['WiFi', 'Laundry', 'Kitchen'], ownerId: 'admin1' },
+        { id: 3, name: 'McCormick Hall', location: 'Cambridge, MA', floors: 3, amenities: ['WiFi', 'AC', 'Study Room'], ownerId: 'admin1' }
+      ];
+    }
+
+    function getDefaultRooms() {
+      return [
+        { id: 1, number: '101', hostelId: 1, hostelName: 'Simmons Hall', floor: 1, capacity: 2, price: 800, amenities: ['WiFi', 'AC'], available: true },
+        { id: 2, number: '201', hostelId: 1, hostelName: 'Simmons Hall', floor: 2, capacity: 2, price: 850, amenities: ['WiFi', 'AC', 'Laundry'], available: true },
+        { id: 3, number: '301', hostelId: 1, hostelName: 'Simmons Hall', floor: 3, capacity: 2, price: 900, amenities: ['WiFi', 'AC', 'Laundry', 'Kitchen'], available: false },
+        { id: 4, number: '401', hostelId: 1, hostelName: 'Simmons Hall', floor: 4, capacity: 2, price: 950, amenities: ['WiFi', 'AC'], available: true },
+        { id: 5, number: '102', hostelId: 2, hostelName: 'Baker House', floor: 1, capacity: 2, price: 750, amenities: ['WiFi', 'Kitchen'], available: true },
+        { id: 6, number: '202', hostelId: 2, hostelName: 'Baker House', floor: 2, capacity: 2, price: 800, amenities: ['WiFi', 'Laundry'], available: true },
+        { id: 7, number: '302', hostelId: 2, hostelName: 'Baker House', floor: 3, capacity: 2, price: 850, amenities: ['WiFi', 'Laundry', 'Kitchen'], available: false },
+        { id: 8, number: '103', hostelId: 3, hostelName: 'McCormick Hall', floor: 1, capacity: 2, price: 700, amenities: ['WiFi', 'Study Room'], available: true },
+        { id: 9, number: '203', hostelId: 3, hostelName: 'McCormick Hall', floor: 2, capacity: 2, price: 750, amenities: ['WiFi', 'AC'], available: true },
+        { id: 10, number: '303', hostelId: 3, hostelName: 'McCormick Hall', floor: 3, capacity: 2, price: 800, amenities: ['WiFi', 'AC', 'Study Room'], available: true }
+      ];
+    }
+
+    function getDefaultMessages() {
+      return [
+        { id: 1, fromId: 'u2', toId: 'u1', text: 'Hey Alex! I saw we have a 72% compatibility match. Want to chat about being roommates?', time: '2024-01-15T10:30:00' },
+        { id: 2, fromId: 'u1', toId: 'u2', text: 'Hi Sarah! That would be great. I noticed we both love coding. What are your sleep habits like?', time: '2024-01-15T10:35:00' },
+        { id: 3, fromId: 'u2', toId: 'u1', text: 'I\'m a bit of a night owl, usually sleep around 12-1 AM. How about you?', time: '2024-01-15T10:40:00' },
+        { id: 4, fromId: 'u1', toId: 'u2', text: 'I usually sleep around 11 PM, so that could work! Do you mind quiet hours after 11?', time: '2024-01-15T10:45:00' },
+        { id: 5, fromId: 'u2', toId: 'u1', text: 'Not at all! I always use headphones at night. This could really work out!', time: '2024-01-15T10:50:00' },
+        { id: 6, fromId: 'u5', toId: 'u1', text: 'Hi Alex! We matched at 85%. I\'m looking for a quiet roommate for Simmons Hall.', time: '2024-01-14T09:00:00' },
+        { id: 7, fromId: 'u1', toId: 'u5', text: 'Hey David! That sounds great. I\'m definitely on the quieter side too.', time: '2024-01-14T09:15:00' },
+        { id: 8, fromId: 'u4', toId: 'u2', text: 'Sarah! Want to check out Baker House together? I heard the rooms are nice!', time: '2024-01-13T14:00:00' },
+        { id: 9, fromId: 'u2', toId: 'u4', text: 'Sure! Let\'s go this weekend. I\'ve been wanting to see the kitchen setup.', time: '2024-01-13T14:30:00' }
+      ];
+    }
+
+    // ============================================
+    // LOCAL STORAGE HELPERS
+    // ============================================
+
+    function getUsers() {
+      let users = localStorage.getItem('roomie_users');
+      if (!users) { users = getDefaultUsers(); localStorage.setItem('roomie_users', JSON.stringify(users)); }
+      else { users = JSON.parse(users); }
+      return users;
+    }
+    function saveUsers(users) { localStorage.setItem('roomie_users', JSON.stringify(users)); }
+
+    function getHostels() {
+      let hostels = localStorage.getItem('roomie_hostels');
+      if (!hostels) { hostels = getDefaultHostels(); localStorage.setItem('roomie_hostels', JSON.stringify(hostels)); }
+      else { hostels = JSON.parse(hostels); }
+      return hostels;
+    }
+    function saveHostels(hostels) { localStorage.setItem('roomie_hostels', JSON.stringify(hostels)); }
+
+    function getRooms() {
+      let rooms = localStorage.getItem('roomie_rooms');
+      if (!rooms) { rooms = getDefaultRooms(); localStorage.setItem('roomie_rooms', JSON.stringify(rooms)); }
+      else { rooms = JSON.parse(rooms); }
+      return rooms;
+    }
+    function saveRooms(rooms) { localStorage.setItem('roomie_rooms', JSON.stringify(rooms)); }
+
+    function getMessages() {
+      let msgs = localStorage.getItem('roomie_messages');
+      if (!msgs) { msgs = getDefaultMessages(); localStorage.setItem('roomie_messages', JSON.stringify(msgs)); }
+      else { msgs = JSON.parse(msgs); }
+      return msgs;
+    }
+    function saveMessages(msgs) { localStorage.setItem('roomie_messages', JSON.stringify(msgs)); }
+
+    function getUserById(id) { return getUsers().find(u => u.id === id); }
+    function getInitials(name) { return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2); }
+
+    // ============================================
+    // TOAST NOTIFICATION
+    // ============================================
+    function showToast(message) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+    }
+
+    // ============================================
+    // MODAL MANAGEMENT
+    // ============================================
+    function showModal(type) {
+      const modal = document.getElementById(type + '-modal');
+      if (modal) modal.classList.remove('hidden');
+      const errEl = document.getElementById(type + '-error');
+      if (errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
+    }
+    function hideModal(type) {
+      const modal = document.getElementById(type + '-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // ============================================
+    // ROLE SELECTION (Register)
+    // ============================================
+    function selectRole(role) {
+      selectedRole = role;
+      document.getElementById('role-student').classList.toggle('selected', role === 'student');
+      document.getElementById('role-admin').classList.toggle('selected', role === 'admin');
+      document.getElementById('student-fields').classList.toggle('hidden', role !== 'student');
+      document.getElementById('admin-fields').classList.toggle('hidden', role !== 'admin');
+    }
+
+    // ============================================
+    // AUTH HANDLERS
+    // ============================================
+    function handleLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const errEl = document.getElementById('login-error');
+
+      if (!email || !password) { errEl.textContent = 'Please fill in all fields.'; errEl.classList.remove('hidden'); return; }
+
+      const users = getUsers();
+      const user = users.find(u => u.email === email && u.password === password);
+
+      if (!user) { errEl.textContent = 'Invalid email or password.'; errEl.classList.remove('hidden'); return; }
+
+      currentUser = user;
+      localStorage.setItem('roomie_current_user', JSON.stringify(user));
+      hideModal('login');
+      showDashboard();
+      showToast('Welcome back, ' + user.name + '!');
+    }
+
+    function handleRegister() {
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const phone = document.getElementById('reg-phone').value.trim();
+      const errEl = document.getElementById('register-error');
+
+      if (!name || !email || !password) { errEl.textContent = 'Please fill in all required fields.'; errEl.classList.remove('hidden'); return; }
+      if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.classList.remove('hidden'); return; }
+
+      const users = getUsers();
+      if (users.find(u => u.email === email)) { errEl.textContent = 'An account with this email already exists.'; errEl.classList.remove('hidden'); return; }
+
+      let newUser;
+
+      if (selectedRole === 'student') {
+        const institute = document.getElementById('reg-institute').value;
+        const department = document.getElementById('reg-department').value.trim();
+        const year = document.getElementById('reg-year').value;
+        const location = document.getElementById('reg-location').value;
+
+        if (!institute || !department || !year) { errEl.textContent = 'Please fill in all student fields.'; errEl.classList.remove('hidden'); return; }
+
+        newUser = {
+          id: 'u' + Date.now(),
+          name, email, password, phone,
+          institute, department, year,
+          role: 'student',
+          location: location || '',
+          bio: '',
+          survey: null
+        };
+      } else {
+        const organization = document.getElementById('reg-organization').value.trim();
+        const adminLocation = document.getElementById('reg-admin-location').value;
+        const designation = document.getElementById('reg-designation').value.trim();
+
+        if (!organization) { errEl.textContent = 'Please fill in the organization field.'; errEl.classList.remove('hidden'); return; }
+
+        newUser = {
+          id: 'admin' + Date.now(),
+          name, email, password, phone,
+          institute: organization,
+          department: 'Administration',
+          year: '',
+          role: 'admin',
+          location: adminLocation || '',
+          organization, designation,
+          bio: '',
+          survey: null
+        };
+      }
+
+      users.push(newUser);
+      saveUsers(users);
+
+      currentUser = newUser;
+      localStorage.setItem('roomie_current_user', JSON.stringify(newUser));
+      hideModal('register');
+      showDashboard();
+      showToast('Welcome to RoomieMatch, ' + name + '!');
+    }
+
+    function quickLogin(email) {
+      const users = getUsers();
+      const user = users.find(u => u.email === email);
+      if (user) {
+        currentUser = user;
+        localStorage.setItem('roomie_current_user', JSON.stringify(user));
+        showDashboard();
+        showToast('Welcome, ' + user.name + '!');
+      } else {
+        showToast('Demo account not found. Try refreshing.');
+      }
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      currentChatUserId = null;
+      localStorage.removeItem('roomie_current_user');
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('landing-page').classList.remove('hidden');
+      showToast('You have been logged out.');
+    }
+
+    // ============================================
+    // DASHBOARD
+    // ============================================
+    function showDashboard() {
+      document.getElementById('landing-page').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+
+      // Update sidebar
+      document.getElementById('sidebar-avatar').textContent = getInitials(currentUser.name);
+      document.getElementById('sidebar-name').textContent = currentUser.name;
+      if (currentUser.role === 'admin') {
+        document.getElementById('sidebar-role').textContent = 'Room Manager - ' + (currentUser.organization || currentUser.institute);
+      } else {
+        document.getElementById('sidebar-role').textContent = 'Student at ' + currentUser.institute;
+      }
+
+      // Build sidebar nav based on role
+      buildSidebarNav();
+
+      // Update profile
+      updateProfileTab();
+
+      // Initialize interests
+      initInterests();
+
+      // Default tab
+      if (currentUser.role === 'admin') {
+        switchTab('admin');
+      } else {
+        switchTab('profile');
+      }
+    }
+
+    function buildSidebarNav() {
+      const nav = document.getElementById('sidebar-nav');
+      nav.innerHTML = '';
+
+      if (currentUser.role === 'student') {
+        nav.innerHTML = `
+          <button class="sidebar-nav-item active" onclick="switchTab('profile')" id="nav-profile"><span>&#128100;</span> Profile</button>
+          <button class="sidebar-nav-item" onclick="switchTab('matches')" id="nav-matches"><span>&#129309;</span> Matches <span class="sidebar-nav-badge" id="matches-badge">0</span></button>
+          <button class="sidebar-nav-item" onclick="switchTab('rooms')" id="nav-rooms"><span>&#127970;</span> Rooms</button>
+          <button class="sidebar-nav-item" onclick="switchTab('messages')" id="nav-messages"><span>&#128172;</span> Messages <span class="sidebar-nav-badge" id="messages-badge">0</span></button>
+        `;
+      } else {
+        nav.innerHTML = `
+          <button class="sidebar-nav-item active" onclick="switchTab('profile')" id="nav-profile"><span>&#128100;</span> Profile</button>
+          <button class="sidebar-nav-item" onclick="switchTab('admin')" id="nav-admin"><span>&#128736;</span> Admin Panel</button>
+          <button class="sidebar-nav-item" onclick="switchTab('messages')" id="nav-messages"><span>&#128172;</span> Messages <span class="sidebar-nav-badge" id="messages-badge">0</span></button>
+        `;
+      }
+    }
+
+    function updateProfileTab() {
+      const user = currentUser;
+      document.getElementById('profile-avatar').textContent = getInitials(user.name);
+      document.getElementById('profile-name').textContent = user.name;
+      document.getElementById('profile-email').textContent = user.email;
+      document.getElementById('profile-dept-badge').textContent = user.department || 'N/A';
+      document.getElementById('profile-role-badge').textContent = user.role === 'admin' ? 'Room Manager' : 'Student';
+      document.getElementById('profile-role-badge').className = 'badge ' + (user.role === 'admin' ? 'badge-teal' : 'badge-emerald');
+
+      if (user.role === 'student') {
+        const yearNames = { '1': '1st Year', '2': '2nd Year', '3': '3rd Year', '4': '4th Year', '5': '5th Year+' };
+        document.getElementById('profile-year-badge').textContent = yearNames[user.year] || '';
+        document.getElementById('profile-year-badge').classList.remove('hidden');
+        document.getElementById('edit-dept-group').classList.remove('hidden');
+        document.getElementById('edit-year-group').classList.remove('hidden');
+        document.getElementById('survey-section').classList.remove('hidden');
+      } else {
+        document.getElementById('profile-year-badge').classList.add('hidden');
+        document.getElementById('edit-dept-group').classList.add('hidden');
+        document.getElementById('edit-year-group').classList.add('hidden');
+        document.getElementById('survey-section').classList.add('hidden');
+        document.getElementById('profile-tab-title').textContent = 'Manager Profile';
+      }
+
+      document.getElementById('edit-name').value = user.name;
+      document.getElementById('edit-email').value = user.email;
+      document.getElementById('edit-institute').value = user.organization ? user.organization + ' (' + user.institute + ')' : user.institute;
+      document.getElementById('edit-department').value = user.department || '';
+      document.getElementById('edit-year').value = user.year || '1';
+      document.getElementById('edit-location').value = user.location || '';
+      document.getElementById('edit-bio').value = user.bio || '';
+
+      // Survey state (student only)
+      if (user.role === 'student') {
+        if (user.survey) {
+          document.querySelectorAll('.survey-panel').forEach(p => p.classList.add('hidden'));
+          document.getElementById('survey-completed').classList.remove('hidden');
+          fillSurveyValues(user.survey);
+        } else {
+          document.querySelectorAll('.survey-panel').forEach(p => p.classList.add('hidden'));
+          document.getElementById('survey-step-1').classList.remove('hidden');
+          document.getElementById('survey-completed').classList.add('hidden');
+          updateSurveyDots(1);
+        }
+      }
+    }
+
+    function fillSurveyValues(survey) {
+      if (!survey) return;
+      const fields = ['sleep', 'study', 'clean', 'social', 'guests', 'noise', 'smoking', 'drinking'];
+      fields.forEach(field => {
+        if (survey[field]) {
+          const radios = document.querySelectorAll('input[name="survey-' + field + '"]');
+          radios.forEach(r => { if (r.value === survey[field]) { r.checked = true; r.closest('.radio-option').classList.add('selected'); } });
+        }
+      });
+    }
+
+    function saveProfile() {
+      const users = getUsers();
+      const idx = users.findIndex(u => u.id === currentUser.id);
+      if (idx === -1) return;
+
+      users[idx].name = document.getElementById('edit-name').value.trim() || users[idx].name;
+      users[idx].department = document.getElementById('edit-department').value.trim() || users[idx].department;
+      users[idx].year = document.getElementById('edit-year').value || users[idx].year;
+      users[idx].location = document.getElementById('edit-location').value.trim();
+      users[idx].bio = document.getElementById('edit-bio').value.trim();
+
+      saveUsers(users);
+      currentUser = users[idx];
+      localStorage.setItem('roomie_current_user', JSON.stringify(currentUser));
+
+      document.getElementById('sidebar-name').textContent = currentUser.name;
+      document.getElementById('sidebar-avatar').textContent = getInitials(currentUser.name);
+      updateProfileTab();
+      showToast('Profile updated successfully!');
+    }
+
+    // ============================================
+    // TAB SWITCHING
+    // ============================================
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+      document.querySelectorAll('.sidebar-nav-item').forEach(n => n.classList.remove('active'));
+
+      const tabEl = document.getElementById('tab-' + tabName);
+      if (tabEl) tabEl.classList.remove('hidden');
+
+      const navEl = document.getElementById('nav-' + tabName);
+      if (navEl) navEl.classList.add('active');
+
+      if (tabName === 'matches') renderMatches();
+      if (tabName === 'rooms') renderRooms();
+      if (tabName === 'messages') renderMessages();
+      if (tabName === 'admin') renderAdmin();
+    }
+
+    // ============================================
+    // COMPATIBILITY ALGORITHM
+    // ============================================
+    function calculateCompatibility(userA, userB) {
+      if (!userA.survey || !userB.survey) return null;
+      const sA = userA.survey; const sB = userB.survey;
+
+      // Routine (40%)
+      const routineFields = ['sleep', 'study', 'clean'];
+      let routineScore = 0;
+      routineFields.forEach(field => {
+        if (sA[field] === sB[field]) { routineScore += 100; }
+        else {
+          const values = { sleep: ['early', 'moderate', 'night'], study: ['morning', 'afternoon', 'evening'], clean: ['very', 'moderate', 'relaxed'] };
+          const opts = values[field] || [];
+          const diff = Math.abs(opts.indexOf(sA[field]) - opts.indexOf(sB[field]));
+          if (diff === 1) routineScore += 50;
+        }
+      });
+      routineScore = routineScore / routineFields.length;
+
+      // Social (35%)
+      const socialFields = ['social', 'guests', 'noise'];
+      let socialScore = 0;
+      socialFields.forEach(field => {
+        if (sA[field] === sB[field]) { socialScore += 100; }
+        else {
+          const values = { social: ['introvert', 'ambivert', 'extrovert'], guests: ['rarely', 'sometimes', 'often'], noise: ['low', 'medium', 'high'] };
+          const opts = values[field] || [];
+          const diff = Math.abs(opts.indexOf(sA[field]) - opts.indexOf(sB[field]));
+          if (diff === 1) socialScore += 50;
+        }
+      });
+      socialScore = socialScore / socialFields.length;
+
+      // Interests (25%)
+      const interestsA = sA.interests || [];
+      const interestsB = sB.interests || [];
+      let interestScore = 0;
+      if (interestsA.length > 0 && interestsB.length > 0) {
+        const common = interestsA.filter(i => interestsB.includes(i));
+        interestScore = (common.length / Math.max(interestsA.length, interestsB.length)) * 100;
+      }
+
+      const totalScore = Math.round(routineScore * 0.40 + socialScore * 0.35 + interestScore * 0.25);
+      return { total: totalScore, routine: Math.round(routineScore), social: Math.round(socialScore), interests: Math.round(interestScore) };
+    }
+
+    // ============================================
+    // SURVEY
+    // ============================================
+    function initInterests() {
+      const container = document.getElementById('interests-container');
+      if (!container) return;
+      container.innerHTML = '';
+      const selectedInterests = (currentUser && currentUser.survey && currentUser.survey.interests) ? currentUser.survey.interests : [];
+      INTEREST_OPTIONS.forEach(interest => {
+        const btn = document.createElement('button');
+        btn.className = 'tag-btn';
+        btn.textContent = interest;
+        if (selectedInterests.includes(interest)) btn.classList.add('selected-emerald');
+        btn.onclick = function() { this.classList.toggle('selected-emerald'); };
+        container.appendChild(btn);
+      });
+    }
+
+    function selectRadio(el, name) {
+      el.parentNode.querySelectorAll('.radio-option').forEach(opt => opt.classList.remove('selected'));
+      el.classList.add('selected');
+      el.querySelector('input').checked = true;
+    }
+
+    function nextSurveyStep(step) {
+      document.querySelectorAll('.survey-panel').forEach(p => p.classList.add('hidden'));
+      document.getElementById('survey-step-' + step).classList.remove('hidden');
+      updateSurveyDots(step);
+    }
+
+    function updateSurveyDots(currentStep) {
+      for (let i = 1; i <= 3; i++) {
+        const dot = document.getElementById('survey-dot-' + i);
+        dot.classList.remove('active', 'completed');
+        if (i < currentStep) dot.classList.add('completed');
+        if (i === currentStep) dot.classList.add('active');
+      }
+    }
+
+    function submitSurvey() {
+      const getValue = (name) => { const checked = document.querySelector('input[name="survey-' + name + '"]:checked'); return checked ? checked.value : null; };
+      const getSelectedInterests = () => { const btns = document.querySelectorAll('#interests-container .tag-btn.selected-emerald'); return Array.from(btns).map(b => b.textContent); };
+
+      const survey = { sleep: getValue('sleep'), study: getValue('study'), clean: getValue('clean'), social: getValue('social'), guests: getValue('guests'), noise: getValue('noise'), smoking: getValue('smoking'), drinking: getValue('drinking'), interests: getSelectedInterests() };
+
+      const required = ['sleep', 'study', 'clean', 'social', 'guests', 'noise'];
+      for (const field of required) { if (!survey[field]) { showToast('Please complete all required fields.'); return; } }
+
+      const users = getUsers();
+      const idx = users.findIndex(u => u.id === currentUser.id);
+      if (idx !== -1) {
+        users[idx].survey = survey;
+        saveUsers(users);
+        currentUser = users[idx];
+        localStorage.setItem('roomie_current_user', JSON.stringify(currentUser));
+      }
+
+      document.querySelectorAll('.survey-panel').forEach(p => p.classList.add('hidden'));
+      document.getElementById('survey-completed').classList.remove('hidden');
+      updateSurveyDots(4);
+      showToast('Survey submitted! Your matches have been updated.');
+    }
+
+    // ============================================
+    // MATCHES
+    // ============================================
+    function renderMatches() {
+      const list = document.getElementById('matches-list');
+      list.innerHTML = '';
+
+      const users = getUsers();
+      const otherUsers = users.filter(u => u.id !== currentUser.id && u.role !== 'admin');
+
+      // Location-based filtering: prioritize same location
+      const matches = [];
+      otherUsers.forEach(user => {
+        const compat = calculateCompatibility(currentUser, user);
+        if (compat) {
+          const sameLocation = (user.location && currentUser.location && user.location === currentUser.location);
+          matches.push({ user, compat, sameLocation });
+        }
+      });
+
+      matches.sort((a, b) => {
+        // Same location first, then by compatibility
+        if (a.sameLocation && !b.sameLocation) return -1;
+        if (!a.sameLocation && b.sameLocation) return 1;
+        return b.compat.total - a.compat.total;
+      });
+
+      const badge = document.getElementById('matches-badge');
+      if (badge) badge.textContent = matches.length;
+
+      let filtered = matches;
+      if (currentMatchFilter === 'high') filtered = matches.filter(m => m.compat.total > 80);
+      else if (currentMatchFilter === 'medium') filtered = matches.filter(m => m.compat.total >= 50 && m.compat.total <= 80);
+      else if (currentMatchFilter === 'low') filtered = matches.filter(m => m.compat.total < 50);
+
+      ['all', 'high', 'medium', 'low'].forEach(f => {
+        const btn = document.getElementById('filter-' + f);
+        if (btn) btn.className = 'btn btn-sm ' + (f === currentMatchFilter ? 'btn-primary' : 'btn-outline');
+      });
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="text-center p-8"><p class="text-muted">No matches found. Complete your compatibility survey to see matches!</p></div>';
+        return;
+      }
+
+      filtered.forEach(match => {
+        const scoreClass = match.compat.total > 80 ? 'high' : match.compat.total >= 50 ? 'medium' : 'low';
+        const yearNames = { '1': '1st Year', '2': '2nd Year', '3': '3rd Year', '4': '4th Year', '5': '5th Year+' };
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        card.innerHTML = `
+          <div class="match-header">
+            <div class="match-user">
+              <div class="avatar avatar-lg">${getInitials(match.user.name)}</div>
+              <div>
+                <div class="match-name">${match.user.name} ${match.sameLocation ? '<span class="badge badge-emerald" style="font-size:0.625rem;">Near You</span>' : ''}</div>
+                <div class="match-dept">${match.user.department} &middot; ${yearNames[match.user.year] || ''} ${match.user.location ? '&middot; ' + match.user.location : ''}</div>
+              </div>
+            </div>
+            <div class="match-score ${scoreClass}">
+              <div class="match-score-value">${match.compat.total}%</div>
+              <div class="match-score-label">Match</div>
+            </div>
+          </div>
+          <div class="match-bio">${match.user.bio || 'No bio available.'}</div>
+          <div class="match-categories">
+            <div class="match-category"><div class="match-category-score" style="color:var(--emerald-600);">${match.compat.routine}%</div><div class="match-category-label">Routine</div></div>
+            <div class="match-category"><div class="match-category-score" style="color:var(--teal-600);">${match.compat.social}%</div><div class="match-category-label">Social</div></div>
+            <div class="match-category"><div class="match-category-score" style="color:var(--amber-500);">${match.compat.interests}%</div><div class="match-category-label">Interests</div></div>
+          </div>
+          <div class="match-actions">
+            <button class="btn btn-sm btn-primary" onclick="startChatWith('${match.user.id}')">&#128172; Message</button>
+            <button class="btn btn-sm btn-outline" onclick="showToast('Match request sent to ${match.user.name}!')">&#129309; Request Match</button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function filterMatches(filter) { currentMatchFilter = filter; renderMatches(); }
+
+    function startChatWith(userId) { switchTab('messages'); setTimeout(() => { selectChat(userId); }, 100); }
+
+    // ============================================
+    // ROOMS
+    // ============================================
+    function renderRooms() {
+      const list = document.getElementById('rooms-list');
+      list.innerHTML = '';
+
+      let rooms = getRooms();
+      const hostels = getHostels();
+
+      // Build hostel filter buttons
+      const filterContainer = document.getElementById('hostel-filter-buttons');
+      filterContainer.innerHTML = '<button class="btn btn-sm ' + (currentHostelFilter === 'all' ? 'btn-primary' : 'btn-outline') + '" id="hostel-filter-all" onclick="filterRooms(\'all\')">All Hostels</button>';
+
+      // If student has a location, show "Near Me" button
+      if (currentUser.location) {
+        const nearMe = hostels.filter(h => h.location === currentUser.location).length > 0;
+        if (nearMe) {
+          filterContainer.innerHTML += '<button class="btn btn-sm ' + (currentHostelFilter === 'nearme' ? 'btn-primary' : 'btn-outline') + '" id="hostel-filter-nearme" onclick="filterRooms(\'nearme\')">&#128205; Near Me</button>';
+        }
+      }
+
+      hostels.forEach(hostel => {
+        filterContainer.innerHTML += '<button class="btn btn-sm ' + (currentHostelFilter === hostel.id ? 'btn-primary' : 'btn-outline') + '" id="hostel-filter-' + hostel.id + '" onclick="filterRooms(' + hostel.id + ')">' + hostel.name + '</button>';
+      });
+
+      // Filter rooms
+      if (currentHostelFilter === 'nearme' && currentUser.location) {
+        const nearHostelIds = hostels.filter(h => h.location === currentUser.location).map(h => h.id);
+        rooms = rooms.filter(r => nearHostelIds.includes(r.hostelId));
+      } else if (currentHostelFilter !== 'all') {
+        rooms = rooms.filter(r => r.hostelId === currentHostelFilter);
+      }
+
+      rooms.forEach(room => {
+        const hostel = hostels.find(h => h.id === room.hostelId);
+        const card = document.createElement('div');
+        card.className = 'room-card';
+        card.innerHTML = `
+          <div class="room-image">
+            &#127970;
+            <div class="room-floor"><span class="badge badge-gray">Floor ${room.floor}</span></div>
+            <div class="room-available">${room.available ? '<span class="badge badge-emerald">Available</span>' : '<span class="badge badge-red">Occupied</span>'}</div>
+          </div>
+          <div class="room-info">
+            <div class="room-header"><div class="room-number">Room ${room.number}</div><div class="room-price">$${room.price}/mo</div></div>
+            <div class="room-hostel">${room.hostelName} ${hostel ? '&middot; ' + hostel.location : ''}</div>
+            <div class="room-amenities">${room.amenities.map(a => '<span class="badge badge-outline">' + a + '</span>').join('')}</div>
+            ${room.available ? '<button class="btn btn-sm btn-primary mt-4 w-full" onclick="showToast(\'Room ' + room.number + ' requested successfully!\')">Request Room</button>' : '<button class="btn btn-sm btn-outline mt-4 w-full" disabled>Not Available</button>'}
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      if (rooms.length === 0) {
+        list.innerHTML = '<div class="text-center p-8" style="grid-column:span 3;"><p class="text-muted">No rooms found matching your filter.</p></div>';
+      }
+    }
+
+    function filterRooms(hostelId) { currentHostelFilter = hostelId; renderRooms(); }
+
+    // ============================================
+    // MESSAGES
+    // ============================================
+    function renderMessages() {
+      const listContainer = document.getElementById('chat-list-items');
+      listContainer.innerHTML = '';
+
+      const users = getUsers();
+      const messages = getMessages();
+
+      const conversations = {};
+      messages.forEach(msg => {
+        const otherId = (msg.fromId === currentUser.id) ? msg.toId : (msg.toId === currentUser.id) ? msg.fromId : null;
+        if (!otherId) return;
+        if (!conversations[otherId] || new Date(msg.time) > new Date(conversations[otherId].time)) {
+          conversations[otherId] = msg;
+        }
+      });
+
+      const sortedConvs = Object.entries(conversations).sort((a, b) => new Date(b[1].time) - new Date(a[1].time));
+      const badge = document.getElementById('messages-badge');
+      if (badge) badge.textContent = sortedConvs.length > 0 ? sortedConvs.length : '';
+
+      if (sortedConvs.length === 0) {
+        listContainer.innerHTML = '<div class="p-4 text-center text-sm text-muted">No conversations yet</div>';
+        return;
+      }
+
+      sortedConvs.forEach(([otherId, lastMsg]) => {
+        const otherUser = getUserById(otherId);
+        if (!otherUser) return;
+        const item = document.createElement('button');
+        item.className = 'chat-list-item' + (currentChatUserId === otherId ? ' active' : '');
+        item.onclick = () => selectChat(otherId);
+        const timeStr = new Date(lastMsg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        item.innerHTML = `
+          <div class="avatar avatar-md">${getInitials(otherUser.name)}</div>
+          <div class="chat-list-item-info">
+            <div class="chat-list-item-top"><span class="chat-list-item-name">${otherUser.name}</span><span class="chat-list-item-time">${timeStr}</span></div>
+            <div class="chat-list-item-msg">${lastMsg.text}</div>
+          </div>
+        `;
+        listContainer.appendChild(item);
+      });
+
+      if (!currentChatUserId) {
+        document.getElementById('chat-empty').classList.remove('hidden');
+        document.getElementById('chat-active').classList.add('hidden');
+        document.getElementById('chat-active').style.display = '';
+      }
+    }
+
+    function selectChat(otherUserId) {
+      currentChatUserId = otherUserId;
+      const otherUser = getUserById(otherUserId);
+      if (!otherUser) return;
+
+      document.getElementById('chat-avatar').textContent = getInitials(otherUser.name);
+      document.getElementById('chat-name').textContent = otherUser.name;
+      document.getElementById('chat-status').textContent = otherUser.role === 'admin' ? (otherUser.organization || 'Room Manager') : otherUser.department;
+
+      document.getElementById('chat-empty').classList.add('hidden');
+      document.getElementById('chat-active').classList.remove('hidden');
+      document.getElementById('chat-active').style.display = 'flex';
+
+      renderChatMessages();
+      renderMessages();
+    }
+
+    function renderChatMessages() {
+      const container = document.getElementById('chat-messages');
+      container.innerHTML = '';
+      if (!currentChatUserId) return;
+
+      const messages = getMessages();
+      const chatMsgs = messages.filter(m =>
+        (m.fromId === currentUser.id && m.toId === currentChatUserId) ||
+        (m.fromId === currentChatUserId && m.toId === currentUser.id)
+      ).sort((a, b) => new Date(a.time) - new Date(b.time));
+
+      chatMsgs.forEach(msg => {
+        const isSent = msg.fromId === currentUser.id;
+        const timeStr = new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble ' + (isSent ? 'sent' : 'received');
+        bubble.innerHTML = `${msg.text}<div class="chat-bubble-time">${timeStr}</div>`;
+        container.appendChild(bubble);
+      });
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text || !currentChatUserId) return;
+
+      const messages = getMessages();
+      messages.push({ id: Date.now(), fromId: currentUser.id, toId: currentChatUserId, text, time: new Date().toISOString() });
+      saveMessages(messages);
+      input.value = '';
+      renderChatMessages();
+    }
+
+    // ============================================
+    // ADMIN PANEL (Room Manager)
+    // ============================================
+    function renderAdmin() {
+      if (currentUser.role !== 'admin') return;
+
+      const users = getUsers();
+      const rooms = getRooms();
+      const hostels = getHostels();
+      const messages = getMessages();
+
+      // Only count this admin's hostels and rooms
+      const myHostels = hostels.filter(h => h.ownerId === currentUser.id);
+      const myHostelIds = myHostels.map(h => h.id);
+      const myRooms = rooms.filter(r => myHostelIds.includes(r.hostelId));
+      const availableRooms = myRooms.filter(r => r.available);
+      const students = users.filter(u => u.role === 'student');
+
+      // Stats
+      document.getElementById('admin-stats').innerHTML = `
+        <div class="stat-card"><div><div class="stat-value">${students.length}</div><div class="stat-label">Total Students</div></div><div class="stat-icon emerald">&#128101;</div></div>
+        <div class="stat-card"><div><div class="stat-value">${myHostels.length}</div><div class="stat-label">My Hostels</div></div><div class="stat-icon teal">&#127970;</div></div>
+        <div class="stat-card"><div><div class="stat-value">${availableRooms.length}</div><div class="stat-label">Available Rooms</div></div><div class="stat-icon emerald">&#128711;</div></div>
+        <div class="stat-card"><div><div class="stat-value">${myRooms.length}</div><div class="stat-label">Total Rooms</div></div><div class="stat-icon amber">&#127968;</div></div>
+      `;
+
+      // Hostels
+      const hostelsContainer = document.getElementById('admin-hostels');
+      hostelsContainer.innerHTML = '';
+      if (myHostels.length === 0) {
+        hostelsContainer.innerHTML = '<div class="text-center p-4 text-muted" style="grid-column:span 3;">No hostels registered yet. Add your first hostel above!</div>';
+      }
+      myHostels.forEach(hostel => {
+        const hostelRooms = rooms.filter(r => r.hostelId === hostel.id);
+        const avail = hostelRooms.filter(r => r.available).length;
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-body">
+            <h4 class="font-semibold mb-2">${hostel.name}</h4>
+            <div class="text-sm text-muted mb-2">&#128205; ${hostel.location || 'No location'}</div>
+            <div class="flex gap-2 mb-4">
+              <span class="badge badge-emerald">${avail} Available</span>
+              <span class="badge badge-gray">${hostelRooms.length - avail} Occupied</span>
+            </div>
+            <div class="text-sm text-muted mb-2">Floors: ${hostel.floors}</div>
+            <div class="room-amenities">${hostel.amenities.map(a => '<span class="badge badge-outline">' + a + '</span>').join('')}</div>
+            <button class="btn btn-sm btn-danger mt-4" onclick="deleteHostel(${hostel.id})">Delete Hostel</button>
+          </div>
+        `;
+        hostelsContainer.appendChild(card);
+      });
+
+      // Update add-room hostel dropdown
+      const hostelSelect = document.getElementById('add-room-hostel');
+      hostelSelect.innerHTML = '<option value="">Select hostel</option>';
+      myHostels.forEach(hostel => {
+        hostelSelect.innerHTML += '<option value="' + hostel.id + '">' + hostel.name + ' (' + hostel.location + ')</option>';
+      });
+
+      // Rooms
+      const roomsContainer = document.getElementById('admin-rooms');
+      roomsContainer.innerHTML = '';
+      if (myRooms.length === 0) {
+        roomsContainer.innerHTML = '<div class="text-center p-4 text-muted" style="grid-column:span 2;">No rooms added yet. Add your first room above!</div>';
+      }
+      myRooms.forEach(room => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-body">
+            <div class="flex justify-between items-center mb-2">
+              <h4 class="font-semibold">Room ${room.number}</h4>
+              <span class="badge ${room.available ? 'badge-emerald' : 'badge-red'}">${room.available ? 'Available' : 'Occupied'}</span>
+            </div>
+            <div class="text-sm text-muted mb-2">${room.hostelName} &middot; Floor ${room.floor}</div>
+            <div class="flex justify-between items-center">
+              <span class="font-semibold text-emerald">$${room.price}/mo</span>
+              <div class="flex gap-2">
+                <button class="btn btn-sm ${room.available ? 'btn-outline' : 'btn-primary'}" onclick="toggleRoomAvailability(${room.id})">${room.available ? 'Mark Occupied' : 'Mark Available'}</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteRoom(${room.id})">Delete</button>
+              </div>
+            </div>
+          </div>
+        `;
+        roomsContainer.appendChild(card);
+      });
+    }
+
+    function addHostel() {
+      const name = document.getElementById('add-hostel-name').value.trim();
+      const location = document.getElementById('add-hostel-location').value;
+      const floors = parseInt(document.getElementById('add-hostel-floors').value) || 0;
+      const amenitiesStr = document.getElementById('add-hostel-amenities').value.trim();
+
+      if (!name || !location || floors <= 0) { showToast('Please fill in all hostel fields.'); return; }
+
+      const amenities = amenitiesStr ? amenitiesStr.split(',').map(a => a.trim()).filter(a => a) : [];
+      const hostels = getHostels();
+      const newId = hostels.length > 0 ? Math.max(...hostels.map(h => h.id)) + 1 : 1;
+
+      hostels.push({ id: newId, name, location, floors, amenities, ownerId: currentUser.id });
+      saveHostels(hostels);
+
+      // Clear form
+      document.getElementById('add-hostel-name').value = '';
+      document.getElementById('add-hostel-location').value = '';
+      document.getElementById('add-hostel-floors').value = '';
+      document.getElementById('add-hostel-amenities').value = '';
+
+      renderAdmin();
+      showToast('Hostel "' + name + '" added successfully!');
+    }
+
+    function deleteHostel(hostelId) {
+      if (!confirm('Are you sure you want to delete this hostel and all its rooms?')) return;
+      let hostels = getHostels();
+      hostels = hostels.filter(h => !(h.id === hostelId && h.ownerId === currentUser.id));
+      saveHostels(hostels);
+
+      // Also delete rooms in this hostel
+      let rooms = getRooms();
+      const hostel = getHostels().find(h => h.id === hostelId); // already deleted, but let's filter rooms
+      rooms = rooms.filter(r => r.hostelId !== hostelId);
+      saveRooms(rooms);
+
+      renderAdmin();
+      showToast('Hostel deleted.');
+    }
+
+    function addRoom() {
+      const hostelId = parseInt(document.getElementById('add-room-hostel').value);
+      const number = document.getElementById('add-room-number').value.trim();
+      const floor = parseInt(document.getElementById('add-room-floor').value) || 0;
+      const capacity = parseInt(document.getElementById('add-room-capacity').value) || 2;
+      const price = parseInt(document.getElementById('add-room-price').value) || 0;
+      const amenitiesStr = document.getElementById('add-room-amenities').value.trim();
+
+      if (!hostelId || !number || floor <= 0 || price <= 0) { showToast('Please fill in all room fields.'); return; }
+
+      const hostels = getHostels();
+      const hostel = hostels.find(h => h.id === hostelId);
+      if (!hostel) { showToast('Hostel not found.'); return; }
+
+      const amenities = amenitiesStr ? amenitiesStr.split(',').map(a => a.trim()).filter(a => a) : [];
+      const rooms = getRooms();
+      const newId = rooms.length > 0 ? Math.max(...rooms.map(r => r.id)) + 1 : 1;
+
+      rooms.push({ id: newId, number, hostelId, hostelName: hostel.name, floor, capacity, price, amenities, available: true });
+      saveRooms(rooms);
+
+      // Clear form
+      document.getElementById('add-room-number').value = '';
+      document.getElementById('add-room-floor').value = '';
+      document.getElementById('add-room-capacity').value = '';
+      document.getElementById('add-room-price').value = '';
+      document.getElementById('add-room-amenities').value = '';
+
+      renderAdmin();
+      showToast('Room ' + number + ' added to ' + hostel.name + '!');
+    }
+
+    function toggleRoomAvailability(roomId) {
+      const rooms = getRooms();
+      const idx = rooms.findIndex(r => r.id === roomId);
+      if (idx !== -1) {
+        rooms[idx].available = !rooms[idx].available;
+        saveRooms(rooms);
+        renderAdmin();
+        showToast('Room ' + rooms[idx].number + ' status updated.');
+      }
+    }
+
+    function deleteRoom(roomId) {
+      if (!confirm('Are you sure you want to delete this room?')) return;
+      let rooms = getRooms();
+      rooms = rooms.filter(r => r.id !== roomId);
+      saveRooms(rooms);
+      renderAdmin();
+      showToast('Room deleted.');
+    }
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    function init() {
+      getUsers();
+      getHostels();
+      getRooms();
+      getMessages();
+
+      const savedUser = localStorage.getItem('roomie_current_user');
+      if (savedUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          const users = getUsers();
+          const found = users.find(u => u.id === currentUser.id);
+          if (found) {
+            currentUser = found;
+            showDashboard();
+          } else {
+            localStorage.removeItem('roomie_current_user');
+          }
+        } catch(e) {
+          localStorage.removeItem('roomie_current_user');
+        }
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
